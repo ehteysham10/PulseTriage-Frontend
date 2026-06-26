@@ -3,49 +3,51 @@ import { api, socket } from '../apiClient';
 
 export const SocketContext = createContext(null);
 
-// Predefined agents with valid Mongoose ObjectIds to avoid database cast errors
-export const AGENTS = [
-  { id: '64b0f3e1a83c6b24d863f101', name: 'Agent Alice' },
-  { id: '64b0f3e1a83c6b24d863f102', name: 'Agent Bob' }
-];
-
 export const SocketProvider = ({ children }) => {
   const [tickets, setTickets] = useState([]);
   const [activeTicketId, setActiveTicketId] = useState(null);
   const [activeMessages, setActiveMessages] = useState([]);
-  const [currentAgent, setCurrentAgentState] = useState(() => {
-    const saved = localStorage.getItem('pt_agent');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        // ignore
-      }
-    }
-    return AGENTS[0]; // Default to Alice
-  });
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [filters, setFilters] = useState({ status: '', priority: '', search: '' });
 
-  const socketRef = useRef(null);
-
-  const setCurrentAgent = (agent) => {
-    setCurrentAgentState(agent);
-    localStorage.setItem('pt_agent', JSON.stringify(agent));
-    // If there is an active ticket, let's unlock it as agent identity has changed
-    if (activeTicketId) {
-      setActiveTicketId(null);
-      setActiveMessages([]);
-    }
-  };
-
-  // Fetch initial tickets
-  const fetchTickets = useCallback(async () => {
+  // Fetch tickets (first page or more)
+  const fetchTickets = useCallback(async (newFilters = null, reset = false) => {
+    setTicketsLoading(true);
     try {
-      const data = await api.getTickets();
-      setTickets(data);
-    } catch (error) {
-      console.error('Failed to fetch tickets:', error);
+      const activeFilters = newFilters || filters;
+      const params = { limit: 20, ...activeFilters };
+      if (!reset && cursor) params.cursor = cursor;
+      const data = await api.getTickets(params);
+      if (reset) {
+        setTickets(data.tickets);
+      } else {
+        setTickets((prev) => {
+          const ids = new Set(prev.map((t) => t._id));
+          const fresh = data.tickets.filter((t) => !ids.has(t._id));
+          return [...prev, ...fresh];
+        });
+      }
+      setCursor(data.nextCursor);
+      setHasMore(data.hasMore);
+    } catch (err) {
+      console.error('Failed to fetch tickets:', err);
+    } finally {
+      setTicketsLoading(false);
     }
-  }, []);
+  }, [cursor, filters]);
+
+  const applyFilters = useCallback((newFilters) => {
+    setFilters(newFilters);
+    setCursor(null);
+    setHasMore(true);
+    fetchTickets(newFilters, true);
+  }, [fetchTickets]);
+
+  const loadMoreTickets = useCallback(() => {
+    if (hasMore && !ticketsLoading) fetchTickets();
+  }, [hasMore, ticketsLoading, fetchTickets]);
 
   // Fetch messages for active ticket
   const fetchMessages = useCallback(async (ticketId) => {
@@ -53,191 +55,163 @@ export const SocketProvider = ({ children }) => {
     try {
       const data = await api.getTicketMessages(ticketId);
       setActiveMessages(data);
-    } catch (error) {
-      console.error('Failed to fetch messages:', error);
+    } catch (err) {
+      console.error('Failed to fetch messages:', err);
     }
   }, []);
 
-  // Initialize socket connection
+  // Socket listeners
   useEffect(() => {
-    if (!socket.connected) {
-      socket.connect();
-    }
-    socketRef.current = socket;
+    if (!socket.connected) socket.connect();
 
-    const onConnect = () => console.log('Connected to socket server:', socket.id);
-    socket.on('connect', onConnect);
-
-    // Handle real-time events from server
     socket.on('ticket:created', (newTicket) => {
-      setTickets((prev) => {
-        if (prev.some((t) => t._id === newTicket._id)) return prev;
-        return [newTicket, ...prev];
-      });
+      setTickets((prev) => prev.some((t) => t._id === newTicket._id) ? prev : [newTicket, ...prev]);
     });
 
-    socket.on('ticket:locked', ({ ticketId, agentId }) => {
+    socket.on('ticket:locked', ({ ticketId, lockedBy }) => {
       setTickets((prev) =>
-        prev.map((t) => (t._id === ticketId ? { ...t, lockedBy: agentId, lockedAt: new Date() } : t))
+        prev.map((t) => t._id === ticketId ? { ...t, lockedBy, lockedAt: new Date() } : t)
       );
     });
 
     socket.on('ticket:unlocked', ({ ticketId }) => {
       setTickets((prev) =>
-        prev.map((t) => (t._id === ticketId ? { ...t, lockedBy: null, lockedAt: null } : t))
+        prev.map((t) => t._id === ticketId ? { ...t, lockedBy: null, lockedAt: null } : t)
       );
     });
 
     socket.on('ticket:resolved', ({ ticketId }) => {
       setTickets((prev) =>
-        prev.map((t) => (t._id === ticketId ? { ...t, status: 'Resolved', lockedBy: null, lockedAt: null } : t))
+        prev.map((t) => t._id === ticketId ? { ...t, status: 'Resolved', lockedBy: null } : t)
+      );
+    });
+
+    socket.on('ticket:assigned', ({ ticketId, assignedTo }) => {
+      setTickets((prev) =>
+        prev.map((t) => t._id === ticketId ? { ...t, assignedTo, status: 'In-Progress' } : t)
       );
     });
 
     socket.on('message:created', (newMessage) => {
-      // If message is for active ticket, append to messages list
       setActiveTicketId((currentId) => {
         if (newMessage.ticketId === currentId) {
-          setActiveMessages((prev) => {
-            if (prev.some((m) => m._id === newMessage._id)) return prev;
-            return [...prev, newMessage];
-          });
+          setActiveMessages((prev) =>
+            prev.some((m) => m._id === newMessage._id) ? prev : [...prev, newMessage]
+          );
         }
         return currentId;
       });
     });
 
-    // Initial fetch
-    fetchTickets();
+    // Initial load
+    fetchTickets(filters, true);
 
     return () => {
-      socket.off('connect', onConnect);
       socket.off('ticket:created');
       socket.off('ticket:locked');
       socket.off('ticket:unlocked');
       socket.off('ticket:resolved');
+      socket.off('ticket:assigned');
       socket.off('message:created');
     };
-  }, [fetchTickets]);
+  }, []); // eslint-disable-line
 
-  // Lock a ticket
-  const lockTicket = useCallback((ticketId) => {
-    if (socketRef.current) {
-      socketRef.current.emit('ticket:lock', { ticketId, agentId: currentAgent.id });
+  // Lock ticket via REST (not socket emit)
+  const lockTicket = useCallback(async (ticketId) => {
+    try {
+      await api.lockTicket(ticketId);
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Could not lock ticket';
+      throw new Error(msg);
     }
-  }, [currentAgent]);
+  }, []);
 
-  // Unlock a ticket
-  const unlockTicket = useCallback((ticketId) => {
-    if (socketRef.current) {
-      socketRef.current.emit('ticket:unlock', { ticketId, agentId: currentAgent.id });
+  // Unlock ticket via REST
+  const unlockTicket = useCallback(async (ticketId) => {
+    try {
+      await api.unlockTicket(ticketId);
+    } catch (err) {
+      console.error('Unlock failed:', err);
     }
-  }, [currentAgent]);
+  }, []);
 
-  // Select active ticket
+  // Select active ticket — unlock old, lock new
   const selectTicket = useCallback(async (ticketId) => {
-    // Unlock old ticket if there was one
     if (activeTicketId && activeTicketId !== ticketId) {
-      unlockTicket(activeTicketId);
+      await unlockTicket(activeTicketId);
     }
-
     setActiveTicketId(ticketId);
     if (ticketId) {
-      lockTicket(ticketId);
-      fetchMessages(ticketId);
+      try {
+        await lockTicket(ticketId);
+        fetchMessages(ticketId);
+      } catch (err) {
+        // Ticket locked by someone else — don't open it
+        alert(err.message);
+        setActiveTicketId(null);
+      }
     } else {
       setActiveMessages([]);
     }
   }, [activeTicketId, lockTicket, unlockTicket, fetchMessages]);
 
-  // Send a message
-  const sendMessage = useCallback(async (ticketId, content) => {
+  // Send message via REST (socket broadcasts automatically)
+  const sendMessage = useCallback(async (ticketId, content, user) => {
     try {
       const newMessage = await api.createTicketMessage(ticketId, {
         senderType: 'Agent',
-        senderId: currentAgent.name,
-        content
+        senderId: user?._id || user?.name || 'Agent',
+        content,
       });
-      setActiveMessages((prev) => {
-        if (prev.some((m) => m._id === newMessage._id)) return prev;
-        return [...prev, newMessage];
-      });
-    } catch (error) {
-      console.error('Failed to send message:', error);
+      setActiveMessages((prev) =>
+        prev.some((m) => m._id === newMessage._id) ? prev : [...prev, newMessage]
+      );
+    } catch (err) {
+      console.error('Failed to send message:', err);
     }
-  }, [currentAgent]);
+  }, []);
 
-  // Resolve a ticket
+  // Resolve ticket
   const resolveTicket = useCallback(async (ticketId) => {
     try {
       await api.resolveTicket(ticketId);
       setTickets((prev) =>
-        prev.map((t) => (t._id === ticketId ? { ...t, status: 'Resolved', lockedBy: null } : t))
+        prev.map((t) => t._id === ticketId ? { ...t, status: 'Resolved', lockedBy: null } : t)
       );
       if (activeTicketId === ticketId) {
         setActiveTicketId(null);
         setActiveMessages([]);
       }
-    } catch (error) {
-      console.error('Failed to resolve ticket:', error);
+    } catch (err) {
+      console.error('Failed to resolve ticket:', err);
     }
   }, [activeTicketId]);
 
-  // Generate Mock Ticket helper
+  // Generate mock ticket (dev helper)
   const generateMockTicket = useCallback(async () => {
-    const mockTickets = [
-      {
-        title: "Database connection timeout in production",
-        description: "Getting connection timeout error (MongooseServerSelectionError) when trying to write to the main MongoDB cluster from backend server. Need immediate resolution as users are unable to login.",
-        customerId: "client-developer@company.com"
-      },
-      {
-        title: "Urgent: Billing issue - charged twice",
-        description: "My subscription was renewed today but my credit card shows two identical pending charges of $49.00. Please refund the duplicate transaction.",
-        customerId: "premium-user@gmail.com"
-      },
-      {
-        title: "API endpoint returning 500 error",
-        description: "The GET /api/v1/products endpoint is crashing when pagination parameter `page=3` is passed. Seems to be an offset out of bounds bug. Low priority.",
-        customerId: "dev-team-lead@partner.io"
-      },
-      {
-        title: "Reset password link not received",
-        description: "I clicked 'forgot password' three times in the last hour but I have not received any password reset email in my inbox or spam folder.",
-        customerId: "unhappy-customer@yahoo.com"
-      }
+    const mocks = [
+      { title: 'Database connection timeout', description: 'MongooseServerSelectionError when writing to MongoDB cluster.', customerId: 'dev@company.com' },
+      { title: 'Charged twice on subscription', description: 'Two identical charges of $49.00 appeared on my card today.', customerId: 'user@gmail.com' },
+      { title: 'API returning 500 on page=3', description: 'GET /api/v1/products crashes with pagination param page=3.', customerId: 'dev@partner.io' },
+      { title: 'Password reset email not received', description: 'Clicked forgot password 3 times but no email received.', customerId: 'user@yahoo.com' },
     ];
-
-    const randomMock = mockTickets[Math.floor(Math.random() * mockTickets.length)];
-
     try {
-      await api.createTicket(randomMock);
-      console.log('Mock ticket generated successfully');
-    } catch (error) {
-      console.error('Failed to generate mock ticket:', error);
+      await api.createTicket(mocks[Math.floor(Math.random() * mocks.length)]);
+    } catch (err) {
+      console.error('Mock ticket failed:', err);
     }
   }, []);
 
   const activeTicket = tickets.find((t) => t._id === activeTicketId) || null;
 
   return (
-    <SocketContext.Provider
-      value={{
-        tickets,
-        activeTicketId,
-        activeTicket,
-        activeMessages,
-        currentAgent,
-        setCurrentAgent,
-        lockTicket,
-        unlockTicket,
-        selectTicket,
-        sendMessage,
-        resolveTicket,
-        generateMockTicket,
-        fetchTickets
-      }}
-    >
+    <SocketContext.Provider value={{
+      tickets, activeTicketId, activeTicket, activeMessages,
+      ticketsLoading, hasMore, filters,
+      lockTicket, unlockTicket, selectTicket,
+      sendMessage, resolveTicket, generateMockTicket,
+      fetchTickets, applyFilters, loadMoreTickets,
+    }}>
       {children}
     </SocketContext.Provider>
   );
