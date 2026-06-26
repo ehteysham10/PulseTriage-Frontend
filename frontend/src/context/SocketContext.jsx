@@ -1,9 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback, useRef } from 'react';
-import { io } from 'socket.io-client';
+import { api, socket } from '../apiClient';
 
 export const SocketContext = createContext(null);
-
-const BACKEND_URL = 'http://localhost:5000';
 
 // Predefined agents with valid Mongoose ObjectIds to avoid database cast errors
 export const AGENTS = [
@@ -42,11 +40,8 @@ export const SocketProvider = ({ children }) => {
   // Fetch initial tickets
   const fetchTickets = useCallback(async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/tickets`);
-      if (response.ok) {
-        const data = await response.json();
-        setTickets(data);
-      }
+      const data = await api.getTickets();
+      setTickets(data);
     } catch (error) {
       console.error('Failed to fetch tickets:', error);
     }
@@ -56,11 +51,8 @@ export const SocketProvider = ({ children }) => {
   const fetchMessages = useCallback(async (ticketId) => {
     if (!ticketId) return;
     try {
-      const response = await fetch(`${BACKEND_URL}/api/tickets/${ticketId}/messages`);
-      if (response.ok) {
-        const data = await response.json();
-        setActiveMessages(data);
-      }
+      const data = await api.getTicketMessages(ticketId);
+      setActiveMessages(data);
     } catch (error) {
       console.error('Failed to fetch messages:', error);
     }
@@ -68,12 +60,13 @@ export const SocketProvider = ({ children }) => {
 
   // Initialize socket connection
   useEffect(() => {
-    const socket = io(BACKEND_URL);
+    if (!socket.connected) {
+      socket.connect();
+    }
     socketRef.current = socket;
 
-    socket.on('connect', () => {
-      console.log('Connected to socket server:', socket.id);
-    });
+    const onConnect = () => console.log('Connected to socket server:', socket.id);
+    socket.on('connect', onConnect);
 
     // Handle real-time events from server
     socket.on('ticket:created', (newTicket) => {
@@ -118,7 +111,12 @@ export const SocketProvider = ({ children }) => {
     fetchTickets();
 
     return () => {
-      socket.disconnect();
+      socket.off('connect', onConnect);
+      socket.off('ticket:created');
+      socket.off('ticket:locked');
+      socket.off('ticket:unlocked');
+      socket.off('ticket:resolved');
+      socket.off('message:created');
     };
   }, [fetchTickets]);
 
@@ -155,22 +153,15 @@ export const SocketProvider = ({ children }) => {
   // Send a message
   const sendMessage = useCallback(async (ticketId, content) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/tickets/${ticketId}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          senderType: 'Agent',
-          senderId: currentAgent.name,
-          content
-        })
+      const newMessage = await api.createTicketMessage(ticketId, {
+        senderType: 'Agent',
+        senderId: currentAgent.name,
+        content
       });
-      if (response.ok) {
-        const newMessage = await response.json();
-        setActiveMessages((prev) => {
-          if (prev.some((m) => m._id === newMessage._id)) return prev;
-          return [...prev, newMessage];
-        });
-      }
+      setActiveMessages((prev) => {
+        if (prev.some((m) => m._id === newMessage._id)) return prev;
+        return [...prev, newMessage];
+      });
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -179,18 +170,13 @@ export const SocketProvider = ({ children }) => {
   // Resolve a ticket
   const resolveTicket = useCallback(async (ticketId) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/tickets/${ticketId}/resolve`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (response.ok) {
-        setTickets((prev) =>
-          prev.map((t) => (t._id === ticketId ? { ...t, status: 'Resolved', lockedBy: null } : t))
-        );
-        if (activeTicketId === ticketId) {
-          setActiveTicketId(null);
-          setActiveMessages([]);
-        }
+      await api.resolveTicket(ticketId);
+      setTickets((prev) =>
+        prev.map((t) => (t._id === ticketId ? { ...t, status: 'Resolved', lockedBy: null } : t))
+      );
+      if (activeTicketId === ticketId) {
+        setActiveTicketId(null);
+        setActiveMessages([]);
       }
     } catch (error) {
       console.error('Failed to resolve ticket:', error);
@@ -225,14 +211,8 @@ export const SocketProvider = ({ children }) => {
     const randomMock = mockTickets[Math.floor(Math.random() * mockTickets.length)];
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/tickets/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(randomMock)
-      });
-      if (response.ok) {
-        console.log('Mock ticket generated successfully');
-      }
+      await api.createTicket(randomMock);
+      console.log('Mock ticket generated successfully');
     } catch (error) {
       console.error('Failed to generate mock ticket:', error);
     }
