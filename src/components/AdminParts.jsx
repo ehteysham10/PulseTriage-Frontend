@@ -12,14 +12,15 @@ import {
 
 function StatCard({ icon: Icon, label, value, color, sub }) {
   return (
-    <div className={`bg-slate-900/60 border rounded-xl p-5 flex items-center gap-4 ${color}`}>
+    <div className={`bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-2xl p-5 flex items-center gap-4 ${color} relative overflow-hidden`}>
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-current/10 border border-current/20 flex-shrink-0">
-        <Icon size={20} className="text-current opacity-80" />
+        <Icon size={20} className="text-current opacity-90" />
       </div>
       <div>
-        <p className="text-2xl font-bold text-slate-100">{value ?? '—'}</p>
-        <p className="text-xs text-slate-400 mt-0.5">{label}</p>
-        {sub && <p className="text-[11px] text-slate-600 mt-0.5">{sub}</p>}
+        <p className="text-2xl font-bold text-white">{value ?? '—'}</p>
+        <p className="text-xs text-amber-100/50 mt-0.5">{label}</p>
+        {sub && <p className="text-[11px] text-amber-100/30 mt-0.5">{sub}</p>}
       </div>
     </div>
   );
@@ -39,7 +40,7 @@ function StatsTab() {
   }, []);
 
   if (loading) return (
-    <div className="flex justify-center py-16"><Loader2 className="text-indigo-400 animate-spin" size={24} /></div>
+    <div className="flex justify-center py-16"><Loader2 className="text-amber-400 animate-spin" size={24} /></div>
   );
 
   const total = (stats?.byStatus?.Open || 0) + (stats?.byStatus?.['In-Progress'] || 0) + (stats?.byStatus?.Resolved || 0);
@@ -60,15 +61,16 @@ function StatsTab() {
           const colors = { High: 'bg-red-500', Medium: 'bg-amber-500', Low: 'bg-emerald-500' };
           const textColors = { High: 'text-red-400', Medium: 'text-amber-400', Low: 'text-emerald-400' };
           return (
-            <div key={p} className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-5">
-              <div className="flex items-center justify-between mb-3">
+            <div key={p} className="bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-2xl p-5 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              <div className="flex items-center justify-between mb-3 relative z-10">
                 <span className={`text-xs font-bold uppercase tracking-wider ${textColors[p]}`}>{p} Priority</span>
-                <span className="text-lg font-bold text-slate-100">{count}</span>
+                <span className="text-lg font-bold text-white">{count}</span>
               </div>
-              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-black/40 rounded-full overflow-hidden relative z-10">
                 <div className={`h-full ${colors[p]} rounded-full transition-all duration-700`} style={{ width: `${pct}%` }} />
               </div>
-              <span className="text-[10px] text-slate-600 mt-1 block">{pct}% of total</span>
+              <span className="text-[10px] text-amber-100/40 mt-1 block relative z-10">{pct}% of total</span>
             </div>
           );
         })}
@@ -107,7 +109,7 @@ function PendingTab() {
     }
   };
 
-  if (loading) return <div className="flex justify-center py-16"><Loader2 className="text-indigo-400 animate-spin" size={24} /></div>;
+  if (loading) return <div className="flex justify-center py-16"><Loader2 className="text-amber-400 animate-spin" size={24} /></div>;
 
   if (agents.length === 0) return (
     <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
@@ -119,32 +121,33 @@ function PendingTab() {
   return (
     <div className="space-y-3">
       {agents.map((agent) => (
-        <div key={agent._id} className="flex items-center justify-between bg-slate-900/50 border border-slate-800/60 rounded-xl px-5 py-4 hover:border-slate-700 transition-all">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center">
+        <div key={agent._id} className="flex flex-col sm:flex-row sm:items-center justify-between bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-2xl p-5 hover:border-amber-500/30 hover:bg-white/[0.05] transition-all duration-300 relative overflow-hidden gap-4">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
               <Users size={16} className="text-amber-400" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-200">{agent.name}</p>
-              <p className="text-xs text-slate-500">{agent.email} · @{agent.username}</p>
-              <p className="text-[10px] text-slate-600 mt-0.5">{new Date(agent.createdAt).toLocaleDateString()}</p>
+              <p className="text-sm font-semibold text-white">{agent.name}</p>
+              <p className="text-xs text-amber-100/60">{agent.email} · @{agent.username}</p>
+              <p className="text-[10px] text-amber-100/40 mt-0.5">{new Date(agent.createdAt).toLocaleDateString()}</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 relative z-10 w-full sm:w-auto">
             <button
               id={`approve-${agent._id}`}
               onClick={() => handle(agent._id, 'approve')}
               disabled={!!actioning[agent._id]}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-400 border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/15 rounded-lg transition-all disabled:opacity-50"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-black bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 rounded-lg transition-all duration-300 disabled:opacity-50"
             >
-              {actioning[agent._id] === 'approve' ? <Loader2 size={12} className="animate-spin" /> : <UserCheck size={12} />}
+              {actioning[agent._id] === 'approve' ? <Loader2 size={12} className="animate-spin text-black" /> : <UserCheck size={12} />}
               Approve
             </button>
             <button
               id={`reject-${agent._id}`}
               onClick={() => handle(agent._id, 'reject')}
               disabled={!!actioning[agent._id]}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-400 border border-red-500/30 bg-red-500/5 hover:bg-red-500/15 rounded-lg transition-all disabled:opacity-50"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-400 border border-red-500/30 bg-red-500/5 hover:bg-red-500/15 rounded-lg transition-all duration-300 disabled:opacity-50"
             >
               {actioning[agent._id] === 'reject' ? <Loader2 size={12} className="animate-spin" /> : <UserX size={12} />}
               Reject

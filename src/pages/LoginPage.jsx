@@ -29,15 +29,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 relative overflow-hidden font-sans">
       {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.05),transparent)]" />
-        {/* Grid */}
-        <div className="absolute inset-0 opacity-[0.02]"
-          style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[400px] bg-amber-500/10 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(245,158,11,0.1),transparent)]" />
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
+      </div>
+
+      {/* Floating Particles Backdrop */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[20%] left-[10%] w-2 h-2 bg-amber-500 rounded-full blur-[1px] animate-float-1" />
+        <div className="absolute top-[60%] left-[25%] w-1.5 h-1.5 bg-yellow-500 rounded-full blur-[1px] animate-float-2" />
+        <div className="absolute top-[40%] right-[15%] w-2 h-2 bg-amber-400 rounded-full blur-[1px] animate-float-3" />
+        <div className="absolute top-[80%] right-[30%] w-1 h-1 bg-yellow-400 rounded-full blur-[1px] animate-float-1" />
+        <div className="absolute top-[10%] right-[45%] w-2.5 h-2.5 bg-amber-600 rounded-full blur-[1.5px] animate-float-2" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -45,12 +51,12 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                <Zap size={20} className="text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <Zap size={20} className="text-black" />
               </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-950 animate-pulse" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full border-2 border-[#0a0a0a] animate-pulse" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
               PulseTriage
             </span>
           </div>
@@ -58,10 +64,14 @@ export default function LoginPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-8 shadow-2xl shadow-black/40">
-          <div className="mb-6">
-            <h1 className="text-xl font-bold text-slate-100">Welcome back</h1>
-            <p className="text-slate-400 text-sm mt-1">Sign in to your agent dashboard</p>
+        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] relative overflow-hidden">
+          {/* Glass Glare */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="absolute top-0 left-0 bottom-0 w-px bg-gradient-to-b from-white/10 to-transparent" />
+          
+          <div className="mb-8 relative z-10">
+            <h1 className="text-2xl font-bold text-white drop-shadow-sm">Welcome back</h1>
+            <p className="text-amber-100/60 text-sm mt-1.5">Sign in to your agent dashboard</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -74,42 +84,46 @@ export default function LoginPage() {
             )}
 
             {/* Email Field */}
-            <div className="space-y-1.5">
-              <label htmlFor="login-email" className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+            <div className="space-y-2 relative z-10">
+              <label htmlFor="login-email" className="text-[11px] font-semibold text-amber-100/50 uppercase tracking-wider ml-1">
                 Email
               </label>
-              <div className="relative">
-                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-                <input
-                  id="login-email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="john@example.com"
-                  required
-                  className="w-full bg-slate-800/60 border border-slate-700/80 hover:border-slate-600 focus:border-indigo-500/80 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
-                />
+              <div className="relative group rounded-xl p-[1px] transition-all duration-300 bg-white/10 focus-within:bg-gradient-to-r focus-within:from-amber-500 focus-within:to-yellow-600 focus-within:shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+                <div className="relative flex items-center bg-[#0d0d0d]/90 rounded-[11px] w-full">
+                  <Mail size={16} className="absolute left-4 text-amber-200/50 pointer-events-none z-10" />
+                  <input
+                    id="login-email"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="john@example.com"
+                    required
+                    className="w-full bg-transparent border-none focus:ring-0 rounded-[11px] pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none transition-all duration-300 relative z-10"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Password Field */}
-            <div className="space-y-1.5">
-              <label htmlFor="login-password" className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+            <div className="space-y-2 relative z-10">
+              <label htmlFor="login-password" className="text-[11px] font-semibold text-amber-100/50 uppercase tracking-wider ml-1">
                 Password
               </label>
-              <div className="relative">
-                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-                <input
-                  id="login-password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="w-full bg-slate-800/60 border border-slate-700/80 hover:border-slate-600 focus:border-indigo-500/80 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
-                />
+              <div className="relative group rounded-xl p-[1px] transition-all duration-300 bg-white/10 focus-within:bg-gradient-to-r focus-within:from-amber-500 focus-within:to-yellow-600 focus-within:shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+                <div className="relative flex items-center bg-[#0d0d0d]/90 rounded-[11px] w-full">
+                  <Lock size={16} className="absolute left-4 text-amber-200/50 pointer-events-none z-10" />
+                  <input
+                    id="login-password"
+                    type="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="w-full bg-transparent border-none focus:ring-0 rounded-[11px] pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none transition-all duration-300 relative z-10"
+                  />
+                </div>
               </div>
             </div>
 
@@ -118,31 +132,31 @@ export default function LoginPage() {
               id="login-submit-btn"
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-200 mt-2"
+              className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 disabled:opacity-60 disabled:cursor-not-allowed text-black font-bold py-3.5 rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] transition-all duration-300 mt-4 relative z-10"
             >
               {loading ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={18} className="animate-spin" />
               ) : (
-                <LogIn size={16} />
+                <LogIn size={18} />
               )}
               {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
 
           {/* Footer Links */}
-          <div className="mt-6 pt-6 border-t border-slate-800/60 flex flex-col gap-2 text-center text-sm">
-            <span className="text-slate-500">
+          <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-3 text-center text-sm relative z-10">
+            <span className="text-amber-100/60">
               New agent?{' '}
               <Link
                 to="/register"
-                className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+                className="text-amber-400 hover:text-white font-medium transition-colors"
               >
                 Request Access
               </Link>
             </span>
             <Link
               to="/submit"
-              className="text-slate-600 hover:text-slate-400 text-xs transition-colors"
+              className="text-white/40 hover:text-white/70 text-xs transition-colors"
             >
               Submit a support ticket as a customer →
             </Link>

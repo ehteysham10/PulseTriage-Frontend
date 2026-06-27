@@ -37,32 +37,45 @@ export default function SubmitTicketPage() {
   if (result) {
     const pClass = priorityColors[result.aiClassification?.priority] || priorityColors.Low;
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-indigo-600/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 relative overflow-hidden font-sans">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[300px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+        
+        {/* Floating Particles Backdrop */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="absolute top-[20%] left-[10%] w-2 h-2 bg-amber-500 rounded-full blur-[1px] animate-float-1" />
+          <div className="absolute top-[60%] left-[25%] w-1.5 h-1.5 bg-yellow-500 rounded-full blur-[1px] animate-float-2" />
+          <div className="absolute top-[40%] right-[15%] w-2 h-2 bg-amber-400 rounded-full blur-[1px] animate-float-3" />
+          <div className="absolute top-[80%] right-[30%] w-1 h-1 bg-yellow-400 rounded-full blur-[1px] animate-float-1" />
+          <div className="absolute top-[10%] right-[45%] w-2.5 h-2.5 bg-amber-600 rounded-full blur-[1.5px] animate-float-2" />
+        </div>
+
         <div className="w-full max-w-lg relative z-10">
-          <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-8 shadow-2xl">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center">
-                <CheckCircle2 size={24} className="text-emerald-400" />
+          <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <div className="absolute top-0 left-0 bottom-0 w-px bg-gradient-to-b from-white/10 to-transparent" />
+            
+            <div className="flex items-center gap-3 mb-6 relative z-10">
+              <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center">
+                <CheckCircle2 size={24} className="text-amber-400" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-100">Ticket Submitted!</h2>
-                <p className="text-slate-400 text-xs">Your ticket has been triaged by AI</p>
+                <h2 className="text-lg font-bold text-white drop-shadow-sm">Ticket Submitted!</h2>
+                <p className="text-amber-100/60 text-xs">Your ticket has been triaged by AI</p>
               </div>
             </div>
 
             {/* AI Classification Result */}
-            <div className="bg-purple-950/20 border border-purple-500/20 rounded-xl p-4 mb-5">
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-5 relative z-10">
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles size={14} className="text-purple-400" />
-                <span className="text-xs font-semibold text-purple-300 uppercase tracking-wider">Gemini AI Classification</span>
+                <Sparkles size={14} className="text-amber-400" />
+                <span className="text-xs font-semibold text-amber-300/80 uppercase tracking-wider">Gemini AI Classification</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 <span className={`text-xs font-bold px-3 py-1 rounded-full border ${pClass}`}>
                   {result.aiClassification?.priority} Priority
                 </span>
                 {result.aiClassification?.tags?.map((tag) => (
-                  <span key={tag} className="text-xs text-slate-400 bg-slate-800 border border-slate-700 px-2.5 py-0.5 rounded-full">
+                  <span key={tag} className="text-xs text-amber-200/60 bg-black/40 border border-white/10 px-2.5 py-0.5 rounded-full">
                     #{tag}
                   </span>
                 ))}
@@ -70,30 +83,30 @@ export default function SubmitTicketPage() {
             </div>
 
             {/* Ticket Info */}
-            <div className="bg-slate-800/30 border border-slate-800 rounded-xl p-4 mb-6 space-y-2">
+            <div className="bg-black/20 border border-white/10 rounded-xl p-4 mb-6 space-y-2 relative z-10">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Ticket ID</span>
-                <span className="text-slate-300 font-mono">{result.ticket?._id?.slice(-10)}</span>
+                <span className="text-amber-100/50">Ticket ID</span>
+                <span className="text-amber-100/80 font-mono">{result.ticket?._id?.slice(-10)}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Status</span>
-                <span className="text-emerald-400 font-medium">{result.ticket?.status}</span>
+                <span className="text-amber-100/50">Status</span>
+                <span className="text-amber-400 font-medium">{result.ticket?.status}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Title</span>
-                <span className="text-slate-300 max-w-[60%] text-right">{result.ticket?.title}</span>
+                <span className="text-amber-100/50">Title</span>
+                <span className="text-amber-100/80 max-w-[60%] text-right">{result.ticket?.title}</span>
               </div>
             </div>
 
-            <p className="text-xs text-slate-500 mb-6 text-center">
+            <p className="text-xs text-amber-100/50 mb-6 text-center relative z-10">
               An agent will review your ticket shortly. Keep your Customer ID for reference.
             </p>
 
             <button
               onClick={() => { setResult(null); setForm({ title: '', description: '', customerId: '' }); }}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-3 rounded-xl transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] relative z-10"
             >
-              <Ticket size={15} />
+              <Ticket size={16} />
               Submit Another Ticket
             </button>
           </div>
@@ -103,37 +116,70 @@ export default function SubmitTicketPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 relative overflow-hidden font-sans">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-600/6 rounded-full blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.5) 1px,transparent 1px)', backgroundSize: '50px 50px' }} />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[400px] bg-amber-500/10 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(245,158,11,0.1),transparent)]" />
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
+      </div>
+
+      {/* Floating Particles Backdrop */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[20%] left-[10%] w-2 h-2 bg-amber-500 rounded-full blur-[1px] animate-float-1" />
+        <div className="absolute top-[60%] left-[25%] w-1.5 h-1.5 bg-yellow-500 rounded-full blur-[1px] animate-float-2" />
+        <div className="absolute top-[40%] right-[15%] w-2 h-2 bg-amber-400 rounded-full blur-[1px] animate-float-3" />
+        <div className="absolute top-[80%] right-[30%] w-1 h-1 bg-yellow-400 rounded-full blur-[1px] animate-float-1" />
+        <div className="absolute top-[10%] right-[45%] w-2.5 h-2.5 bg-amber-600 rounded-full blur-[1.5px] animate-float-2" />
       </div>
 
       <div className="w-full max-w-lg relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <Zap size={20} className="text-white" />
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="relative">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <Zap size={20} className="text-black" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full border-2 border-[#0a0a0a] animate-pulse" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">PulseTriage</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent">PulseTriage</span>
           </div>
-          <div className="flex items-center justify-center gap-2 text-slate-400 text-sm">
-            <Sparkles size={13} className="text-purple-400" />
+          <div className="flex items-center justify-center gap-2 text-amber-100/60 text-sm">
+            <Sparkles size={13} className="text-amber-400" />
             <span>AI-powered ticket triage — your request will be classified automatically</span>
           </div>
         </div>
 
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-8 shadow-2xl">
-          <div className="flex items-center gap-2 mb-6">
-            <Ticket size={18} className="text-indigo-400" />
+        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="absolute top-0 left-0 bottom-0 w-px bg-gradient-to-b from-white/10 to-transparent" />
+
+          {/* AI Scanner overlay */}
+          {loading && (
+            <div className="absolute inset-0 bg-[#0a0a0a]/85 backdrop-blur-md flex flex-col items-center justify-center z-50 rounded-3xl overflow-hidden p-6 animate-fade-in">
+              {/* Scan Beam */}
+              <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-scan z-10" />
+              <div className="relative flex flex-col items-center justify-center space-y-4 text-center">
+                <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.15)] animate-pulse">
+                  <Sparkles size={28} className="text-amber-400 animate-spin-slow" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">Gemini AI Triaging...</h3>
+                  <p className="text-xs text-amber-100/50 mt-1 max-w-[240px]">Analyzing context, determining priority, and routing tags</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 mb-8 relative z-10">
+            <Ticket size={20} className="text-amber-400" />
             <div>
-              <h1 className="text-lg font-bold text-slate-100">Submit a Support Ticket</h1>
-              <p className="text-slate-400 text-xs">Describe your issue and our AI will prioritize and route it</p>
+              <h1 className="text-xl font-bold text-white drop-shadow-sm">Submit a Support Ticket</h1>
+              <p className="text-amber-100/60 text-xs mt-0.5">Describe your issue and our AI will prioritize and route it</p>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
             {error && (
               <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-xl p-3.5">
                 <AlertCircle size={16} className="text-red-400 flex-shrink-0 mt-0.5" />
@@ -141,44 +187,50 @@ export default function SubmitTicketPage() {
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <label htmlFor="ticket-customerid" className="text-xs font-medium text-slate-400 uppercase tracking-wider">Your Customer ID / Email</label>
-              <div className="relative">
-                <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input id="ticket-customerid" name="customerId" type="text" value={form.customerId} onChange={handleChange} placeholder="customer@email.com or your-id" required className="w-full bg-slate-800/60 border border-slate-700/80 hover:border-slate-600 focus:border-indigo-500/80 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" />
+            <div className="space-y-2">
+              <label htmlFor="ticket-customerid" className="text-[11px] font-semibold text-amber-100/50 uppercase tracking-wider ml-1">Your Customer ID / Email</label>
+              <div className="relative group rounded-xl p-[1px] transition-all duration-300 bg-white/10 focus-within:bg-gradient-to-r focus-within:from-amber-500 focus-within:to-yellow-600 focus-within:shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+                <div className="relative flex items-center bg-[#0d0d0d]/90 rounded-[11px] w-full">
+                  <User size={16} className="absolute left-4 text-amber-200/50 pointer-events-none z-10" />
+                  <input id="ticket-customerid" name="customerId" type="text" value={form.customerId} onChange={handleChange} placeholder="customer@email.com or your-id" required className="w-full bg-transparent border-none focus:ring-0 rounded-[11px] pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none transition-all duration-300 relative z-10" />
+                </div>
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="ticket-title" className="text-xs font-medium text-slate-400 uppercase tracking-wider">Issue Title</label>
-              <div className="relative">
-                <Hash size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input id="ticket-title" name="title" type="text" value={form.title} onChange={handleChange} placeholder="e.g. Login page not loading on Chrome" required className="w-full bg-slate-800/60 border border-slate-700/80 hover:border-slate-600 focus:border-indigo-500/80 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" />
+            <div className="space-y-2">
+              <label htmlFor="ticket-title" className="text-[11px] font-semibold text-amber-100/50 uppercase tracking-wider ml-1">Issue Title</label>
+              <div className="relative group rounded-xl p-[1px] transition-all duration-300 bg-white/10 focus-within:bg-gradient-to-r focus-within:from-amber-500 focus-within:to-yellow-600 focus-within:shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+                <div className="relative flex items-center bg-[#0d0d0d]/90 rounded-[11px] w-full">
+                  <Hash size={16} className="absolute left-4 text-amber-200/50 pointer-events-none z-10" />
+                  <input id="ticket-title" name="title" type="text" value={form.title} onChange={handleChange} placeholder="e.g. Login page not loading on Chrome" required className="w-full bg-transparent border-none focus:ring-0 rounded-[11px] pl-11 pr-4 py-3.5 text-sm text-white placeholder-white/30 focus:outline-none transition-all duration-300 relative z-10" />
+                </div>
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="ticket-description" className="text-xs font-medium text-slate-400 uppercase tracking-wider">Detailed Description</label>
-              <div className="relative">
-                <FileText size={15} className="absolute left-3.5 top-3.5 text-slate-500" />
-                <textarea id="ticket-description" name="description" value={form.description} onChange={handleChange} placeholder="Describe the issue in detail — what happened, when, and what you expected..." required rows={5} className="w-full bg-slate-800/60 border border-slate-700/80 hover:border-slate-600 focus:border-indigo-500/80 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none" />
+            <div className="space-y-2">
+              <label htmlFor="ticket-description" className="text-[11px] font-semibold text-amber-100/50 uppercase tracking-wider ml-1">Detailed Description</label>
+              <div className="relative group rounded-xl p-[1px] transition-all duration-300 bg-white/10 focus-within:bg-gradient-to-r focus-within:from-amber-500 focus-within:to-yellow-600 focus-within:shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+                <div className="relative flex items-start bg-[#0d0d0d]/90 rounded-[11px] w-full pt-3.5">
+                  <FileText size={16} className="absolute left-4 text-amber-200/50 pointer-events-none z-10 mt-1" />
+                  <textarea id="ticket-description" name="description" value={form.description} onChange={handleChange} placeholder="Describe the issue in detail — what happened, when, and what you expected..." required rows={5} className="w-full bg-transparent border-none focus:ring-0 rounded-[11px] pl-11 pr-4 py-0 text-sm text-white placeholder-white/30 focus:outline-none transition-all duration-300 relative z-10 resize-none" />
+                </div>
               </div>
             </div>
 
-            <div className="bg-purple-950/20 border border-purple-500/15 rounded-xl p-3 flex items-center gap-2.5">
-              <Sparkles size={13} className="text-purple-400 flex-shrink-0" />
-              <p className="text-xs text-purple-300/80">Our Gemini AI will automatically classify the priority and assign relevant tags to your ticket.</p>
+            <div className="bg-amber-500/10 border border-amber-500/15 rounded-xl p-3.5 flex items-center gap-3 relative z-10">
+              <Sparkles size={14} className="text-amber-400 flex-shrink-0" />
+              <p className="text-xs text-amber-200/70 leading-relaxed">Our Gemini AI will automatically classify the priority and assign relevant tags to your ticket.</p>
             </div>
 
-            <button id="submit-ticket-btn" type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-60 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-500/25 transition-all duration-200">
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-              {loading ? 'Submitting & Triaging…' : 'Submit Ticket'}
+            <button id="submit-ticket-btn" type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 disabled:opacity-60 text-black font-bold py-3.5 rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] transition-all duration-300 mt-4 relative z-10">
+              <Send size={18} />
+              Submit Ticket
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-800/60 text-center text-sm">
-            <span className="text-slate-500">Are you an agent? </span>
-            <Link to="/login" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">Sign In</Link>
+          <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm relative z-10">
+            <span className="text-amber-100/60">Are you an agent? </span>
+            <Link to="/login" className="text-amber-400 hover:text-white font-medium transition-colors">Sign In</Link>
           </div>
         </div>
       </div>
